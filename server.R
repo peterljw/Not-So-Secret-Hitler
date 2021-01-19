@@ -27,12 +27,20 @@ calculate_remaining_policies <- function(df_history){
     history_outcomes = sapply(df_history$`Outcome`, function(x) claim_mapping[x])
     return(c(6,11) - add(history_outcomes))
   }
-  else{
+  else if(nrow(df_history) > 5 & nrow(df_history) < 9){
     # calculate based on outcome history up to row 5 and player1_claim starting at round 6
     history_outcomes = sapply(df_history[1:5,]$`Outcome`, function(x) claim_mapping[x])
     history_policies = sapply(df_history[5:nrow(df_history),]$`Claim 1`, function(x) claim_mapping[x])
     history_combined = c(history_outcomes, history_policies)
     return(c(6,11) - add(history_combined))
+  }
+  else if(nrow(df_history) == 9){
+    # calculate based on outcome history
+    history_outcomes = sapply(df_history$`Outcome`, function(x) claim_mapping[x])
+    return(c(6,11) - add(history_outcomes))
+  }
+  else{
+    return(c(0,0))
   }
 }
 
@@ -125,7 +133,7 @@ shinyServer(function(input, output) {
     reset("player2_claim")
     
     output$probability_table <- DT::renderDataTable(df_prob)
-    output$history_table <- DT::renderDataTable(df_history)
+    output$history_table <- DT::renderDataTable({df_history},filter = 'top',rownames = FALSE)
   })
   
   observeEvent(input$undo, {
@@ -137,7 +145,7 @@ shinyServer(function(input, output) {
     reset("player2_claim")
     
     output$probability_table <- DT::renderDataTable(df_prob)
-    output$history_table <- DT::renderDataTable(df_history)
+    output$history_table <- DT::renderDataTable({df_history},filter = 'top',rownames = FALSE)
   })
   
   observeEvent(input$reset, {
@@ -150,7 +158,7 @@ shinyServer(function(input, output) {
     reset("player2_claim")
     
     output$probability_table <- DT::renderDataTable(df_prob)
-    output$history_table <- DT::renderDataTable(df_history)
+    output$history_table <- DT::renderDataTable({df_history},filter = 'top',rownames = FALSE)
   })
   
 })
